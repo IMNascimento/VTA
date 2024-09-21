@@ -4,30 +4,36 @@ from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, r
 
 class EvaluationMetrics:
     def __init__(self, y_true, y_pred):
-        self.y_true = y_true
-        self.y_pred = y_pred
+        self._y_true = y_true
+        self._y_pred = y_pred
 
     def evaluate(self):
+        """
+        Avalia as predições em relação aos valores verdadeiros utilizando várias métricas.
+        Converte as predições contínuas para binárias e exibe a matriz de confusão, acurácia, precisão, recall e F1-score.
+        
+        :return: Matriz de confusão, acurácia, precisão, recall, e F1-score.
+        """
         # Limpeza e transformação dos dados
         # Convertendo as predições contínuas para valores binários (0 ou 1) com base em um threshold de 0.5
-        y_pred_binario = [1 if pred >= 0.5 else 0 for pred in self.y_pred]
-        y_true_binario = [int(val) for val in self.y_true]  # Garantir que o y_true esteja em formato binário
+        y_pred_binary = [1 if pred >= 0.5 else 0 for pred in self._y_pred]
+        y_true_binary = [int(val) for val in self._y_true]  # Garantir que o y_true esteja em formato binário
         
         # Calcula a matriz de confusão
-        cm = confusion_matrix(y_true_binario, y_pred_binario)
+        cm = confusion_matrix(y_true_binary, y_pred_binary)
         
         # Calcula as métricas de avaliação
-        accuracy = accuracy_score(y_true_binario, y_pred_binario)
-        precision = precision_score(y_true_binario, y_pred_binario, average='binary')
-        recall = recall_score(y_true_binario, y_pred_binario, average='binary')
-        f1 = f1_score(y_true_binario, y_pred_binario, average='binary')
+        accuracy = accuracy_score(y_true_binary, y_pred_binary)
+        precision = precision_score(y_true_binary, y_pred_binary, average='binary')
+        recall = recall_score(y_true_binary, y_pred_binary, average='binary')
+        f1 = f1_score(y_true_binary, y_pred_binary, average='binary')
         
         # Exibe os resultados
-        print("Matriz de Confusão:")
+        print("Confusion Matrix:")
         print(cm)
-        print(f"Acurácia: {accuracy:.2f}")
-        print(f"Precisão: {precision:.2f}")
-        print(f"Sensibilidade (Recall): {recall:.2f}")
+        print(f"Accuracy: {accuracy:.2f}")
+        print(f"Precision: {precision:.2f}")
+        print(f"Recall: {recall:.2f}")
         print(f"F1-Score: {f1:.2f}")
         
         # Gerar o gráfico da matriz de confusão

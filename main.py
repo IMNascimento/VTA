@@ -3,64 +3,28 @@ from src.vehicle_over_system import VehicleOvertakeSystem
 from src.evaluation_metrics import EvaluationMetrics
 
 
-# Criando o sistema de controle de ultrapassagem
-#sistema_ultrapassagem = VehicleOvertakeSystem()
+# Carregando e processando os dados de teste balanceados
+generator = TestDataGenerator(csv_path='data/dados_de_teste_balanceados_menor.csv')
+balanced_data = generator.load_and_process_data()
 
-# Simulando uma entrada
-#inputs = {
-#    'distancia': 130,
-#    'velocidade_relativa': 80,
-#    'permissao': 1,
-#    'pista': 1,
-#    'visibilidade': 1
-#}
+# Criação do sistema de controle de ultrapassagem de veículos
+overtake_system = VehicleOvertakeSystem()
 
-# Realizando a simulação
-#resultado = sistema_ultrapassagem.simulate(inputs)
-#print(f"Decisão de ultrapassagem: {resultado:.2f}")
-
-# Gerando e salvando gráficos das variáveis como PNG
-#sistema_ultrapassagem.distancia.plot(input_value=inputs['distancia'])
-#istema_ultrapassagem.velocidade_relativa.plot(input_value=inputs['velocidade_relativa'])
-#sistema_ultrapassagem.permissao.plot(input_value=inputs['permissao'])
-#sistema_ultrapassagem.pista.plot(input_value=inputs['pista'])
-#sistema_ultrapassagem.visibilidade.plot(input_value=inputs['visibilidade'])
-
-
-# Criar o gerador de dados
-gerador = TestDataGenerator(quantidade=800)
-
-# Gerar os dados de teste
-dados_teste = gerador.gerar_dados_de_teste()
-
-# Salvar os dados de teste não balanceados
-dados_teste.to_csv('dados_de_teste_nao_balanceados.csv', index=False)
-
-# Balancear os dados usando undersampling
-dados_balanceados = gerador.balancear_dados(metodo="undersample")
-dados_balanceados.to_csv('dados_de_teste_balanceados.csv', index=False)
-
-gerador = TestDataGenerator(caminho_csv='dados_de_teste_balanceados.csv')
-dados_balanceados= gerador.carregar_dados_csv()
-
-# Criando o sistema de controle de ultrapassagem
-sistema_ultrapassagem = VehicleOvertakeSystem()
-
-# Realizando a simulação para os dados balanceados
-resultados = []
-for _, row in dados_balanceados.iterrows():
+# Executando a simulação para os dados balanceados
+results = []
+for _, row in balanced_data.iterrows():
     inputs = {
-        'distancia': row['distancia'],
-        'velocidade_relativa': row['velocidade_relativa'],
-        'permissao': row['permissao'],
-        'pista': row['pista'],
-        'visibilidade': row['visibilidade']
+        'distance': row['distance'],
+        'relative_speed': row['relative_speed'],
+        'permission': row['permission'],
+        'road': row['road'],
+        'visibility': row['visibility']
     }
-    
-    # Realiza a simulação
-    resultado = sistema_ultrapassagem.simulate(inputs)
-    resultados.append(resultado)
+    # Executando a simulação
+    result = overtake_system.simulate(inputs)
+    results.append(result)
 
-# Avaliação dos resultados usando os dados balanceados
-validacao = EvaluationMetrics(dados_balanceados['target'], resultados)
-validacao.evaluate()
+# Avaliando os resultados usando dados balanceados
+evaluation = EvaluationMetrics(balanced_data['target'], results)
+evaluation.evaluate()
+

@@ -1,155 +1,162 @@
-from src.linguistic_variable import LinguisticVariable
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+from src.linguistic_variable import LinguisticVariable
 
 class VehicleOvertakeSystem:
     def __init__(self):
-        self.distancia = LinguisticVariable('distancia', np.arange(0, 500, 1), {
-            'pequena': fuzz.trapmf(np.arange(0, 500, 1), [0, 0, 100, 200]),
-            'media': fuzz.trimf(np.arange(0, 500, 1), [150, 250, 350]),
-            'grande': fuzz.trapmf(np.arange(0, 500, 1), [300, 400, 500, 500])
+        # Ajustando o intervalo de distância para até 50 metros
+        self.distance = LinguisticVariable('distance', np.arange(0, 51, 1), {
+            'pequena': fuzz.trapmf(np.arange(0, 51, 1), [0, 0, 10, 20]),
+            'media': fuzz.trimf(np.arange(0, 51, 1), [15, 25, 35]),
+            'grande': fuzz.trapmf(np.arange(0, 51, 1), [30, 40, 50, 50])
         })
 
-        self.velocidade_relativa = LinguisticVariable('velocidade_relativa', np.arange(0, 250, 1), {
-            'baixa': fuzz.trapmf(np.arange(0, 250, 1), [0, 0, 50, 100]),
-            'media': fuzz.trimf(np.arange(0, 250, 1), [80, 150, 200]),
-            'alta': fuzz.trapmf(np.arange(0, 250, 1), [150, 200, 250, 250])
+        # Ajustando o intervalo de velocidade relativa para até 56 m/s
+        self.relative_speed = LinguisticVariable('relative_speed', np.arange(0, 57, 1), {
+            'baixa': fuzz.trapmf(np.arange(0, 57, 1), [0, 0, 10, 20]),
+            'media': fuzz.trimf(np.arange(0, 57, 1), [15, 30, 45]),
+            'alta': fuzz.trapmf(np.arange(0, 57, 1), [40, 50, 56, 56])
         })
 
-        self.permissao = LinguisticVariable('permissao', np.arange(0, 1.1, 0.1), {
-            'nao_permitido': fuzz.trimf(np.arange(0, 1.1, 0.1), [0, 0, 0.5]),
-            'permitido': fuzz.trimf(np.arange(0, 1.1, 0.1), [0.5, 1, 1])
+            
+        # Visibilidade: função de pertinência com transição suave
+        self.visibility = LinguisticVariable('visibility', np.arange(0, 1.1, 0.1), {
+            'ruim': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0, 0, 0.3, 0.5]),  # Transição suave de ruim para boa
+            'boa': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0.4, 0.6, 1, 1])    # Sobreposição entre 0.4 e 0.6
         })
 
-        self.pista = LinguisticVariable('pista', np.arange(0, 1.1, 0.1), {
-            'obstruida': fuzz.trimf(np.arange(0, 1.1, 0.1), [0, 0, 0.5]),
-            'livre': fuzz.trimf(np.arange(0, 1.1, 0.1), [0.5, 1, 1])
+        # Permissão: função de pertinência com transição suave
+        self.permission = LinguisticVariable('permission', np.arange(0, 1.1, 0.1), {
+            'nao_permitido': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0, 0, 0.3, 0.5]),  # Transição suave de não permitido para permitido
+            'permitido': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0.4, 0.6, 1, 1])      # Sobreposição entre 0.4 e 0.6
+        })
+        self.road = LinguisticVariable('road', np.arange(0, 1.1, 0.1), {
+            'obstruida': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0, 0, 0.3, 0.5]),  # Transição suave de obstruída para livre
+            'livre': fuzz.trapmf(np.arange(0, 1.1, 0.1), [0.4, 0.6, 1, 1])      # Sobreposição entre 0.4 e 0.6
         })
 
-        self.visibilidade = LinguisticVariable('visibilidade', np.arange(0, 1.1, 0.1), {
-            'ruim': fuzz.trimf(np.arange(0, 1.1, 0.1), [0, 0, 0.5]),
-            'boa': fuzz.trimf(np.arange(0, 1.1, 0.1), [0.5, 1, 1])
-        })
 
-        self.iniciar_ultrapassagem = LinguisticVariable('iniciar_ultrapassagem', np.arange(0, 1.1, 0.1), {
+        # Mantendo o mesmo intervalo para a variável de saída (decisão de ultrapassagem)
+        self.overtake_decision = LinguisticVariable('overtake_decision', np.arange(0, 1.1, 0.1), {
             'nao': fuzz.trimf(np.arange(0, 1.1, 0.1), [0, 0, 0.5]),
-            'sim': fuzz.trimf(np.arange(0, 1.1, 0.1), [0.5, 1, 1])
+            'sim': fuzz.trimf(np.arange(0, 1.1, 0.1), [0.51, 1, 1])
         })
 
     def create_rules(self):
-        # Regras existentes
+         # 1. Se a distância é pequena e a velocidade relativa é alta, e a permissão, pista e visibilidade são favoráveis, então deve ultrapassar
         rule1 = ctrl.Rule(
-            self.distancia.variable['pequena'] & self.velocidade_relativa.variable['alta'] &
-            self.permissao.variable['permitido'] & self.pista.variable['livre'] &
-            self.visibilidade.variable['boa'], self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['pequena'] & self.relative_speed.variable['alta'] &
+            self.permission.variable['permitido'] & self.road.variable['livre'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
         )
 
+        # 2. Se a distância é pequena e a velocidade relativa é média, e a permissão, pista e visibilidade são favoráveis, então deve ultrapassar
         rule2 = ctrl.Rule(
-            self.distancia.variable['pequena'] & self.velocidade_relativa.variable['media'] &
-            self.permissao.variable['permitido'] & self.pista.variable['livre'] &
-            self.visibilidade.variable['boa'], self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['pequena'] & self.relative_speed.variable['media'] &
+            self.permission.variable['permitido'] & self.road.variable['livre'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
         )
 
+        # 3. Se a distância é média e a velocidade relativa é alta, e a permissão, pista e visibilidade são favoráveis, então deve ultrapassar
         rule3 = ctrl.Rule(
-            self.distancia.variable['grande'] | self.velocidade_relativa.variable['baixa'] |
-            self.pista.variable['obstruida'], self.iniciar_ultrapassagem.variable['nao']
+            self.distance.variable['media'] & self.relative_speed.variable['alta'] &
+            self.permission.variable['permitido'] & self.road.variable['livre'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
         )
 
+        # 4. Se a distância é média e a velocidade relativa é média, e a permissão, pista e visibilidade são favoráveis, então deve ultrapassar
         rule4 = ctrl.Rule(
-            self.distancia.variable['media'] & self.velocidade_relativa.variable['alta'] &
-            self.permissao.variable['permitido'] & self.pista.variable['livre'],
-            self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['media'] & self.relative_speed.variable['media'] &
+            self.permission.variable['permitido'] & self.road.variable['livre'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
         )
 
-        # Regras adicionais para cobrir mais cenários:
-        
-        # Se a visibilidade for ruim, não deve ultrapassar, independentemente das outras variáveis
+        # 5. Se a distância é grande ou a velocidade relativa é baixa ou a pista está obstruída, não deve ultrapassar
         rule5 = ctrl.Rule(
-            self.visibilidade.variable['ruim'], self.iniciar_ultrapassagem.variable['nao']
+            self.distance.variable['grande'] | self.relative_speed.variable['baixa'] |
+            self.road.variable['obstruida'], self.overtake_decision.variable['nao']
         )
 
-        # Se a pista estiver obstruída, não deve ultrapassar
+        # 6. Se a visibilidade é ruim, não deve ultrapassar, independentemente das outras condições
         rule6 = ctrl.Rule(
-            self.pista.variable['obstruida'], self.iniciar_ultrapassagem.variable['nao']
+            self.visibility.variable['ruim'], self.overtake_decision.variable['nao']
         )
-        
-        # Se a permissão for negada (não_permitido), não deve ultrapassar
+
+        # 7. Se a permissão para ultrapassar é negada, não deve ultrapassar
         rule7 = ctrl.Rule(
-            self.permissao.variable['nao_permitido'], self.iniciar_ultrapassagem.variable['nao']
+            self.permission.variable['nao_permitido'], self.overtake_decision.variable['nao']
         )
-        
-        # Se a distância for grande e a velocidade for alta, não deve ultrapassar
+
+        # 8. Se a pista está obstruída, não deve ultrapassar
         rule8 = ctrl.Rule(
-            self.distancia.variable['grande'] & self.velocidade_relativa.variable['alta'],
-            self.iniciar_ultrapassagem.variable['nao']
+            self.road.variable['obstruida'], self.overtake_decision.variable['nao']
         )
-        
-        # Se a distância for pequena, a velocidade for baixa e a permissão for dada, deve ultrapassar
+
+        # 9. Se a distância é pequena e a velocidade relativa é baixa, e a permissão é dada, deve ultrapassar
         rule9 = ctrl.Rule(
-            self.distancia.variable['pequena'] & self.velocidade_relativa.variable['baixa'] &
-            self.permissao.variable['permitido'], self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['pequena'] & self.relative_speed.variable['baixa'] &
+            self.permission.variable['permitido'] & self.road.variable['livre'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
         )
 
-        # Se a distância for média, a velocidade for média e a visibilidade for boa, deve ultrapassar
+        # 10. Se a distância é grande e a velocidade relativa é alta, não deve ultrapassar
         rule10 = ctrl.Rule(
-            self.distancia.variable['media'] & self.velocidade_relativa.variable['media'] &
-            self.visibilidade.variable['boa'], self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['grande'] & self.relative_speed.variable['alta'],
+            self.overtake_decision.variable['nao']
         )
 
-        # Se a velocidade for muito alta, mas a permissão e visibilidade forem boas, deve ultrapassar
+        # 11. Se a distância é média e a velocidade relativa é alta, e a pista e visibilidade são favoráveis, deve ultrapassar
         rule11 = ctrl.Rule(
-            self.velocidade_relativa.variable['alta'] & self.permissao.variable['permitido'] &
-            self.visibilidade.variable['boa'], self.iniciar_ultrapassagem.variable['sim']
+            self.distance.variable['media'] & self.relative_speed.variable['alta'] &
+            self.road.variable['livre'] & self.visibility.variable['boa'],
+            self.overtake_decision.variable['sim']
         )
 
-        # Se a velocidade for baixa e a visibilidade for ruim, não deve ultrapassar
+        # 12. Se a distância é grande e a velocidade relativa é média, e a pista está livre, não deve ultrapassar
         rule12 = ctrl.Rule(
-            self.velocidade_relativa.variable['baixa'] & self.visibilidade.variable['ruim'],
-            self.iniciar_ultrapassagem.variable['nao']
-        )
-        rule13 = ctrl.Rule(
-            self.distancia.variable['pequena'] & self.velocidade_relativa.variable['alta'],
-            self.iniciar_ultrapassagem.variable['nao']
-        )
-        rule14 = ctrl.Rule(
-            self.velocidade_relativa.variable['baixa'] & self.visibilidade.variable['boa'] & 
-            self.pista.variable['livre'], self.iniciar_ultrapassagem.variable['sim']
-        )
-        rule15 = ctrl.Rule(
-            self.visibilidade.variable['boa'] & (self.pista.variable['obstruida'] | self.permissao.variable['nao_permitido']),
-            self.iniciar_ultrapassagem.variable['nao']
-        )
-        #Regra de fallback para casos não cobertos (padrão de segurança):
-        rule16 = ctrl.Rule(
-            ~((self.distancia.variable['pequena'] | self.distancia.variable['media'] | self.distancia.variable['grande']) &
-            (self.velocidade_relativa.variable['baixa'] | self.velocidade_relativa.variable['media'] | self.velocidade_relativa.variable['alta']) &
-            (self.permissao.variable['permitido'] | self.permissao.variable['nao_permitido']) &
-            (self.pista.variable['livre'] | self.pista.variable['obstruida']) &
-            (self.visibilidade.variable['boa'] | self.visibilidade.variable['ruim'])),
-            self.iniciar_ultrapassagem.variable['nao']
+            self.distance.variable['grande'] & self.relative_speed.variable['media'] &
+            self.road.variable['livre'], self.overtake_decision.variable['nao']
         )
 
-        # Adicionando todas as regras criadas à lista de regras
+        # 13. Se a velocidade é muito alta, mas a permissão é dada e a visibilidade é boa, deve ultrapassar
+        rule13 = ctrl.Rule(
+            self.relative_speed.variable['alta'] & self.permission.variable['permitido'] &
+            self.visibility.variable['boa'], self.overtake_decision.variable['sim']
+        )
+
+        # 14. Se a velocidade é baixa e a visibilidade é ruim, não deve ultrapassar
+        rule14 = ctrl.Rule(
+            self.relative_speed.variable['baixa'] & self.visibility.variable['ruim'],
+            self.overtake_decision.variable['nao']
+        )
+
+        # 15. Se a pista está obstruída ou a permissão para ultrapassar é negada, não deve ultrapassar
+        rule15 = ctrl.Rule(
+            self.road.variable['obstruida'] | self.permission.variable['nao_permitido'],
+            self.overtake_decision.variable['nao']
+        )
+
+        # Retorna todas as regras criadas
         return [rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11, rule12, rule13, rule14, rule15]
 
     def simulate(self, inputs):
         try:
             # Cria o sistema de controle e a simulação
             rules = self.create_rules()
-            ultrapassagem_ctrl = ctrl.ControlSystem(rules)
-            ultrapassagem_sim = ctrl.ControlSystemSimulation(ultrapassagem_ctrl)
-
+            overtake_ctrl = ctrl.ControlSystem(rules)
+            overtake_sim = ctrl.ControlSystemSimulation(overtake_ctrl)
             # Passa as entradas
-            ultrapassagem_sim.input['distancia'] = inputs['distancia']
-            ultrapassagem_sim.input['velocidade_relativa'] = inputs['velocidade_relativa']
-            ultrapassagem_sim.input['permissao'] = inputs['permissao']
-            ultrapassagem_sim.input['pista'] = inputs['pista']
-            ultrapassagem_sim.input['visibilidade'] = inputs['visibilidade']
+            overtake_sim.input['distance'] = inputs['distance']
+            overtake_sim.input['relative_speed'] = inputs['relative_speed']
+            overtake_sim.input['permission'] = inputs['permission']
+            overtake_sim.input['road'] = inputs['road']
+            overtake_sim.input['visibility'] = inputs['visibility']
 
             # Realiza a computação
-            ultrapassagem_sim.compute()
-            return ultrapassagem_sim.output['iniciar_ultrapassagem']
+            overtake_sim.compute()
+            return overtake_sim.output['overtake_decision']
         except ValueError as e:
             print(f"Erro na simulação: {e}")
-            return None
+            print(inputs)
+            return 10

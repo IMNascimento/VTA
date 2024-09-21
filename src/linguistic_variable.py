@@ -3,25 +3,41 @@ from skfuzzy import control as ctrl
 
 class LinguisticVariable:
     def __init__(self, name, universe, terms):
-        self.name = name
-        self.universe = universe
-        self.terms = terms
-        self.variable = ctrl.Antecedent(universe, name) if name != 'iniciar_ultrapassagem' else ctrl.Consequent(universe, name)
+        """
+        Inicializa a variável linguística com seu nome, universo de discurso e termos fuzzy.
+        
+        :param name: Nome da variável linguística.
+        :param universe: Universo de discurso da variável.
+        :param terms: Dicionário contendo os termos fuzzy e suas funções de pertinência.
+        """
+        self._name = name
+        self._universe = universe
+        self._terms = terms
+        self._variable = ctrl.Antecedent(universe, name) if name != 'overtake_decision' else ctrl.Consequent(universe, name)
         self._define_terms()
     
     def _define_terms(self):
-        for term_name, mf in self.terms.items():
-            self.variable[term_name] = mf
+        """
+        Define os termos fuzzy e suas funções de pertinência para a variável linguística.
+        """
+        for term_name, mf in self._terms.items():
+            self._variable[term_name] = mf
 
     def plot(self, input_value=None, output_value=None, medians=[]):
-        # Criação do gráfico utilizando matplotlib
+        """
+        Plota a função de pertinência da variável linguística.
+        
+        :param input_value: Valor de entrada que será mostrado no gráfico (opcional).
+        :param output_value: Valor de saída que será mostrado no gráfico (opcional).
+        :param medians: Lista de valores medianos (opcional).
+        """
         plt.figure(figsize=(8, 6))
-        for label in self.terms:
-            plt.plot(self.universe, self.variable[label].mf, label=label)
+        for label in self._terms:
+            plt.plot(self._universe, self._variable[label].mf, label=label)
 
         # Configurações do gráfico
-        plt.title(f'Função de Pertinência - {self.name}')
-        plt.xlabel(self.name)
+        plt.title(f'Função de Pertinência - {self._name}')
+        plt.xlabel(self._name)
         plt.ylabel('Pertinência')
         plt.legend(loc='upper right')
 
@@ -34,5 +50,11 @@ class LinguisticVariable:
             plt.axvline(x=output_value, color='blue', linestyle='-.', label=f'Output: {output_value}')
 
         # Salvando o gráfico como PNG
-        plt.savefig(f'{self.name}_fuzzy_plot.png')
+        plt.savefig(f'{self._name}_fuzzy_plot.png')
         plt.close()
+
+
+
+    @property
+    def variable(self):
+        return self._variable
