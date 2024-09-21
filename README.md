@@ -112,8 +112,7 @@ Contribuições são bem-vindas! Se você tiver sugestões de melhorias ou encon
 Se você utilizar este código ou artigo em sua pesquisa ou projeto, por favor, cite-o da seguinte forma:
 
 **Formato ABNT:**
-NASCIMENTO, Igor M. *Modelagem Nebulosa para Controle de Ultrapassagem
-em Veículos Terrestres Autônomos*. Disponível em:[imnascimento.github.io](https://imnascimento.github.io/Portifolio/assets/pdf/artigos/UFJF___L%C3%B3gica_Fuzzy_Controle_de_ultrapassagem_de_um_ve%C3%ADculo_terrestre_aut%C3%B4nomo.pdf). Acesso em: 21/09/2024.
+NASCIMENTO, Igor M. *Modelagem Nebulosa para Controle de Ultrapassagem em Veículos Terrestres Autônomos*. Disponível em:[imnascimento.github.io](https://imnascimento.github.io/Portifolio/assets/pdf/artigos/UFJF___L%C3%B3gica_Fuzzy_Controle_de_ultrapassagem_de_um_ve%C3%ADculo_terrestre_aut%C3%B4nomo.pdf). Acesso em: 21/09/2024.
 
 **BibTeX:**
 ```bibtex
