@@ -2,13 +2,13 @@
 Este repositório contém o código-fonte para simular um sistema de controle de ultrapassagem em veículos autônomos utilizando um Sistema de Inferência Nebulosa (SIN). O foco deste projeto está na geração de dados de teste, balanceamento dos dados, simulação e avaliação das decisões de ultrapassagem com base nas variáveis de entrada.
 
 ## Estrutura do Repositório
-src/data_generator.py: Script para gerar dados de teste para o sistema de inferência nebulosa.
-src/vehicle_over_system.py: Script que implementa o sistema de controle de ultrapassagem usando lógica nebulosa.
-src/evaluation_metrics.py: Script que avalia os resultados da simulação, calculando métricas de desempenho.
-requirements.txt: Arquivo listando todas as dependências necessárias para executar os scripts.
+**src/data_generator.py**: Script para gerar dados de teste para o sistema de inferência nebulosa.
+**src/vehicle_over_system.py**: Script que implementa o sistema de controle de ultrapassagem usando lógica nebulosa.
+**src/evaluation_metrics.py**: Script que avalia os resultados da simulação, calculando métricas de desempenho.
+**requirements.txt**: Arquivo listando todas as dependências necessárias para executar os scripts.
 
 ## Pré-requisitos
-Para reproduzir os experimentos, você precisará ter o Python 3.8+ instalado em seu ambiente. Recomenda-se utilizar um ambiente virtual para gerenciar as dependências.
+Para reproduzir os experimentos, você precisará ter o Python 3.9+ instalado em seu ambiente. Recomenda-se utilizar um ambiente virtual para gerenciar as dependências.
 
 ## Instalação
 Clone este repositório em sua máquina local:
